@@ -60,8 +60,8 @@ int PlyStnRStickLtRt = 0;  //Value read off the PS2 Right Stick left/right
 int PlyStnLStickUpDn = 0; //Value read off the PS2 Left Stick up/down
 int PlyStnLStickLtRt = 0; // Value read off the PS2 Left Stick left/right
 
-void playNote(int note) {
-  MIDI.sendNoteOn(note, 100, channel);
+void playNote(int note, int vol) {
+  MIDI.sendNoteOn(note, vol, channel);
   digitalWrite(LED_BUILTIN, HIGH);
   delay(5);
   MIDI.sendNoteOff(note,100,channel);
@@ -90,7 +90,6 @@ void setup()
       Serial.println("true)");
     else
       Serial.println("false");
-      Serial.println("Holding L1 or R1 will print out the analog stick values.");
     }  
     else if(error == 1)
       Serial.println("No controller found, check wiring, see readme.txt to enable debug. visit www.billporter.info for troubleshooting tips");
@@ -105,16 +104,20 @@ void setup()
   type = ps2x.readType(); 
   switch(type) {
     case 0:
-      Serial.print("Unknown Controller type found ");
+      if (DEBUG)
+        Serial.print("Unknown Controller type found ");
       break;
     case 1:
-      Serial.print("DualShock Controller found ");
+      if (DEBUG)
+        Serial.print("DualShock Controller found ");
       break;
     case 2:
-      Serial.print("GuitarHero Controller found ");
+      if (DEBUG)
+        Serial.print("GuitarHero Controller found ");
       break;
     case 3:
-      Serial.print("Wireless Sony DualShock Controller found ");
+      if (DEBUG)
+        Serial.print("Wireless Sony DualShock Controller found ");
       break;
   }
   pinMode(LEDpin, OUTPUT);  //Sets the LEDpin to output
@@ -138,35 +141,34 @@ void loop()
 
   // if (ps2x.NewButtonState()) {
       if(ps2x.ButtonPressed(PSB_L1))
-        playNote(ltrig1);
+        playNote(ltrig1, 100);
       if(ps2x.ButtonPressed(PSB_R1))
-        playNote(rtrig1);
+        playNote(rtrig1, 100);
       if(ps2x.ButtonPressed(PSB_L2))
-        playNote(ltrig2);
+        playNote(ltrig2, 100);
       if(ps2x.ButtonPressed(PSB_R2))
-        playNote(rtrig2);
+        playNote(rtrig2, 100);
       if(ps2x.ButtonPressed(PSB_TRIANGLE))
-        playNote(button_triangle);
+        playNote(button_triangle, 100);
       if(ps2x.ButtonPressed(PSB_CIRCLE))
-        playNote(button_circle);
+        playNote(button_circle, 100);
       if(ps2x.ButtonPressed(PSB_CROSS))
-        playNote(button_cross); 
+        playNote(button_cross, 100); 
       if(ps2x.ButtonPressed(PSB_SQUARE))
-        playNote(button_square);
+        playNote(button_square, 100);
       // if(ps2x.Button(PSB_START))
       //   Serial.println("Start is being held");
       // if(ps2x.Button(PSB_SELECT))
       //   Serial.println("Select is being held");      
       if(ps2x.ButtonPressed(PSB_PAD_UP))
-        playNote(dpad_up);
+        playNote(dpad_up, ps2x.Analog(PSAB_PAD_UP)/2);
       if(ps2x.ButtonPressed(PSB_PAD_RIGHT))
-        playNote(dpad_right);
+        playNote(dpad_right, ps2x.Analog(PSAB_PAD_RIGHT)/2);
       if(ps2x.ButtonPressed(PSB_PAD_LEFT))
-        playNote(dpad_left);
-      if(ps2x.ButtonPressed(PSB_PAD_DOWN))
-        playNote(dpad_down);
-        // Serial.print("DOWN held this hard: ");
-        // Serial.println(ps2x.Analog(PSAB_PAD_DOWN), DEC);
+        playNote(dpad_left, ps2x.Analog(PSAB_PAD_LEFT)/2);
+      if(ps2x.ButtonPressed(PSB_PAD_DOWN)) {
+        playNote(dpad_down, ps2x.Analog(PSAB_PAD_DOWN)/2);
+      }
   // }
 
   delay(5);
